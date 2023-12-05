@@ -109,7 +109,7 @@ print("Server started up on IP: " + udp_host + " Port: " + str(udp_port))
 # get res from server then apply if else statements in client
 # e.g. if server_json['res'] == 'join_suc': print appropriate message
 
-filenames = os.listdir(os.path.abspath('CSNETWK-FileExchangeSystem/server'))
+filenames = os.listdir(os.path.abspath('server'))
 #print("Current files: ")
 #for file in filenames:
 #    print(file)
@@ -256,7 +256,7 @@ try:
 
                 if filenames is not None:
                     #Send Directory to client
-                    server_message = f"\Server Directory:\n".encode('utf-8')
+                    server_message = f"Server Directory:\n".encode('utf-8')
                     sock.sendto(server_message, addr)
 
                     # Send each filename
