@@ -91,10 +91,6 @@ def recv_file (filename, sock, addr):
         print("Error receiving file from " + str(addr))        
         return False
 
-def get_files():
-    filenames = os.listdir('server')
-    return filenames
-
 try:
     sock.bind(ADDR)
 except sock.error:
@@ -112,6 +108,11 @@ print("Server started up on IP: " + udp_host + " Port: " + str(udp_port))
 # for sending responses to client
 # get res from server then apply if else statements in client
 # e.g. if server_json['res'] == 'join_suc': print appropriate message
+
+filenames = os.listdir(os.path.abspath('CSNETWK-FileExchangeSystem/server'))
+#print("Current files: ")
+#for file in filenames:
+#    print(file)
 
 try:
     while True:
@@ -142,6 +143,7 @@ try:
             print("Invalid command received")
 
         res = {"res":"nan"}
+
 
         #/join <ip> <port>
         if cmd == "join":
@@ -220,41 +222,45 @@ try:
                 res["res"] = "store_fail"
         #/get <filename>
         elif cmd == "get":
-            #In connection, user
-            if addr in users.keys():
-                print("User " + users[addr] + " wants to get " + filename)
-                if send_file(filename, 1024, sock, addr):
-                    print("Succesfully sent " + filename)
-                    res["res"] = "get_success"
-                else:
-                    print("Error sending " + filename)
-                    res["res"] = "get_fail"
-            #In connection, guest
-            elif addr in guests.keys():
-                print("Guest wants to get " + filename)
-                if send_file(filename, 1024, sock, addr):
-                    print("Successfully sent " + filename)
-                    res["res"] = "get_success"
-                else:
-                    print("Error sending " + filename)
-                    res["res"] = "get_fail"
-            #Not in connection
-            else:
-                print("Client not in connection")
+            if filename not in filenames:
+                print("File not found")
                 res["res"] = "get_fail"
+            else:
+            #In connection, user
+                if addr in users.keys():
+                    print("User " + users[addr] + " wants to get " + filename)
+                    if send_file(filename, 1024, sock, addr):
+                        print("Succesfully sent " + filename)
+                        res["res"] = "get_success"
+                    else:
+                        print("Error sending " + filename)
+                        res["res"] = "get_fail"
+                #In connection, guest
+                elif addr in guests.keys():
+                    print("Guest wants to get " + filename)
+                    if send_file(filename, 1024, sock, addr):
+                        print("Successfully sent " + filename)
+                        res["res"] = "get_success"
+                    else:
+                        print("Error sending " + filename)
+                        res["res"] = "get_fail"
+                #Not in connection
+                else:
+                    print("Client not in connection")
+                    res["res"] = "get_fail"
         #/dir
         elif cmd == "dir":
             #In connection, user
             if addr in users.keys():
                 print("User " + users[addr] + " wants to get directory")
-                directory = get_files
-                if directory is not None:
+
+                if filenames is not None:
                     #Send Directory to client
                     server_message = f"\Server Directory:\n".encode('utf-8')
                     sock.sendto(server_message, addr)
 
                     # Send each filename
-                    for file in directory:
+                    for file in filenames:
                         filename_encoded = file.encode('utf-8')
                         sock.sendto(filename_encoded, addr)
                 else:
@@ -262,14 +268,13 @@ try:
                     res["res"] = "dir_fail"
             elif addr in guests.keys():
                 print("Guest wants to get directory")
-                directory = get_files
-                if directory is not None:
+                if filenames is not None:
                     #Send Directory to client
                     server_message = f"\Server Directory:\n".encode('utf-8')
                     sock.sendto(server_message, addr)
 
                     # Send each filename
-                    for file in directory:
+                    for file in filenames:
                         filename_encoded = file.encode('utf-8')
                         sock.sendto(filename_encoded, addr)
                 else:
@@ -280,6 +285,8 @@ try:
                 print("Client not in connection")
                 res["res"] = "dir_fail"
 
+        jmsg = json.dumps(res).encode('utf-8')
+        sock.sendto(jmsg, addr)
 except KeyboardInterrupt:
     print("Keyboard Interrupt. Exiting...")
 
