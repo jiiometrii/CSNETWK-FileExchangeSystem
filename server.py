@@ -133,8 +133,8 @@ try:
                 res["res"] = "conn_fail"
         #/register <handle>
         elif cmd == "register":
-            #Handle not taken
-            if handle not in users.values():
+            # Handle not taken and address does not already have a handle
+            if handle not in users.values() and addr not in users.keys():
                 guests[addr] = handle
                 users[addr] = handle
 
@@ -142,31 +142,29 @@ try:
                 print("Current users: ", users, "\n")
 
                 res["res"] = "reg_success"
-            #Handle taken
+            # Handle taken or address already has a handle
             else:
-                print("Handle already taken")
+                print("Handle already taken or address already has a handle")
 
                 res["res"] = "reg_fail"
         #/leave
         elif cmd == "leave":
             #In connection, guest
             if addr in guests.keys() and guests[addr] == "guest":
-                guests.pop(addr)
                 print("Guest successfully left: " + str(addr))
-
                 res["res"] = "leave_success"
+                guests.pop(addr)
             #In connection, user
             elif addr in users.keys():
                 client_leave = users[addr]
-                guests.pop(addr)
-
-                print(client_leave + "successfully left: " + str(addr))
+                print(client_leave + " successfully left: " + str(addr))
                 print("Current users: ", users, "\n")
 
                 output = {"ser_msg": client_leave + " has left the chat."}
                 res["res"] = "leave_success"
                 for key in users.keys():
                     sock.sendto(json.dumps(output).encode('utf-8'), key)
+                guests.pop(addr)
             #Not in connection
             else:
                 print("Client not in connection")
@@ -236,7 +234,7 @@ try:
                 print("User " + users[addr] + " wants to get directory")
 
                 if filenames is not None:
-                    res['dir'] = filenames
+                    res['filenames'] = filenames
                     res["res"] = "dir_success"
                 else:
                     print("No files in the server")
@@ -244,7 +242,7 @@ try:
             elif addr in guests.keys():
                 print("Guest wants to get directory")
                 if filenames is not None:
-                    res['dir'] = filenames
+                    res['filenames'] = filenames
                     res["res"] = "dir_success"
                 else:
                     print("No files in the server")
@@ -257,9 +255,6 @@ try:
         jmsg = json.dumps(res).encode('utf-8')
         sock.sendto(jmsg, addr)
 
-        if KeyboardInterrupt:
-            print("Keyboard Interrupt. Exiting...")
-            break
 except KeyboardInterrupt:
     print("Program terminated.")
     sys.exit(0)
