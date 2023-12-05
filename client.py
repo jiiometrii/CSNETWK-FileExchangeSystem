@@ -5,7 +5,7 @@ import threading
 import time
 import queue
 
-SERVER_IP = '192.168.254.110'
+SERVER_IP = '127.0.0.1'
 SERVER_PORT = 12345
 
 def print_menu():
@@ -13,8 +13,9 @@ def print_menu():
     print("To join a server: /join <server_ip_add> <port>")
     print("To leave a server: /leave")
     print("To register a handle: /register <handle>")
-    print("To message all users: /store <filename>")
-    print("To message one user: /dir")
+    print("To store a file in the server: /store <filename>")
+    print("To get the list of files: /dir")
+    print("To get a file in the server: /get <filename>")
     print("To see all commands: /?")
     print("To end program: /quit\n")
 
@@ -43,7 +44,7 @@ class Client:
                 with open(filename, 'rb') as f:
                     file_data = f.read()
                 cmd_data["filename"] = filename
-                cmd_data["file_data"] = file_data.decode('utf-8', 'ignore')
+                cmd_data["file_data"] = file_data.decode('utf-8')
             elif self.cmd_name == "get":
                 cmd_data["filename"] = cmd_parts[1]
             elif self.cmd_name == "dir":
