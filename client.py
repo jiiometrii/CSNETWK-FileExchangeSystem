@@ -6,3 +6,4 @@ import json
 
 sock = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)      # For UDP
 
+#implement /? commands here 
