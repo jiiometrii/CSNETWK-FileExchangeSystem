@@ -97,7 +97,6 @@ def get_files():
 
 try:
     sock.bind(ADDR)
-    sock.settimeout(.5)
 except sock.error:
     print("Bind failed. Error: " + str(socket.error))
     exit()
