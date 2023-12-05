@@ -35,10 +35,14 @@ def send_file(filename, buffer_size, addr):
         res['pck_count'] = pck_count
 
         #send file
-        with open(os.path.join('server/',filename)) as f:
+        with open(os.path.join('server/',filename), 'rb') as f:
+            print("Reading file...")
             file_data = f.read()
 
+        print(file_data)
+        res['filename'] = filename
         res['file_data'] = file_data.decode('utf-8')
+        print(file_data)
 
         print("File successfully sent to " + str(addr))
         return True
@@ -158,7 +162,7 @@ try:
             elif addr in users.keys():
                 client_leave = users[addr]
                 print(client_leave + " successfully left: " + str(addr))
-                print("Current users: ", users, "\n")
+                print("Current users: ", guests, "\n")
 
                 output = {"ser_msg": client_leave + " has left the chat."}
                 res["res"] = "leave_success"
@@ -180,6 +184,7 @@ try:
                 if addr in users.keys():
                     print("User " + users[addr] + " wants to store " + filename)
                     if recv_file(filename, file_data, addr):
+                        filenames = os.listdir(os.path.abspath('server'))
                         print("Successfully stored " + filename)
                         res['filename'] = filename
                         res["res"] = "store_success"
@@ -187,6 +192,7 @@ try:
                         print("Error storing " + filename)
                         res["res"] = "store_fail"
                 elif addr in guests.keys():
+                    filenames = os.listdir(os.path.abspath('server'))
                     print("Guest wants to store " + filename)
                     if recv_file(filename, file_data, addr):
                         print("Successfully stored " + filename)
@@ -208,7 +214,7 @@ try:
             #In connection, user
                 if addr in users.keys():
                     print("User " + users[addr] + " wants to get " + filename)
-                    if send_file(filename, 1024, sock, addr):
+                    if send_file(filename, 1024, addr):
                         print("Succesfully sent " + filename)
                         res["res"] = "get_success"
                     else:
@@ -217,7 +223,7 @@ try:
                 #In connection, guest
                 elif addr in guests.keys():
                     print("Guest wants to get " + filename)
-                    if send_file(filename, 1024, sock, addr):
+                    if send_file(filename, 1024, addr):
                         print("Successfully sent " + filename)
                         res["res"] = "get_success"
                     else:

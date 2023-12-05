@@ -103,7 +103,21 @@ class Client:
                             elif response['res'] == 'store_fail':
                                 self.message_queue.put('Failed to store the file.\n')
                             elif response['res'] == 'get_success':
-                                self.message_queue.put('Successfully got the file.\n')
+                                filename = response['filename']
+                                file_data = response['file_data']
+                                self.message_queue.put("Receiving file " + filename + " from server")
+                                try:
+                                    #file details
+                                    self.message_queue.put("filename: " + filename)
+                                    self.message_queue.put("file size: " + str(len(file_data)) + " bytes")
+                                    file_data = file_data.encode('utf-8')
+                                    print("decoded data")
+                                    #receive file
+                                    with open(filename, 'wb') as f:
+                                        f.write(file_data)
+                                    self.message_queue.put('Successfully got the file.\n')
+                                except:
+                                    self.message_queue.put('Error getting the file.\n')
                             elif response['res'] == 'get_fail':
                                 self.message_queue.put('Failed to get the file from server.\n')
                             elif response['res'] == 'dir_success':
@@ -172,7 +186,8 @@ def main():
             else:
                 print("You are not connected to a server\n")
         elif command == '/?':
-            pass
+            if client is not None:
+                print_menu()
         elif command.startswith('/'):
             if client is not None:
                 client.send_command(command)
