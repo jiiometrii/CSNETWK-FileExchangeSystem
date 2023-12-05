@@ -17,7 +17,6 @@ def print_menu():
     print("To get the list of files: /dir")
     print("To get a file in the server: /get <filename>")
     print("To see all commands: /?")
-    print("To end program: /quit\n")
 
 class Client:
     def __init__(self):
